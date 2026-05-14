@@ -1,1 +1,152 @@
 
+{
+  "config": {
+    "maintenance": false,
+    "silentCheck": true,
+    "timezone": "Asia/Kolkata",
+    "broadcastEnabled": false,
+    "broadcastMessage": "🔥 New Season Update is Live! Check Telegram.",
+    "adminUrl": "https://t.me/DPMods",
+    "tgBotToken": "8775423887:AAFOOZJ76suZrWrKI4nPFA4BIwiiP64B43E",
+    "tgChatId": "8340378254"
+  },
+  "security": {
+    "packageName": "com.dpmods",
+    "killOnMismatch": true
+  },
+  "ui": {
+    "title": "DPMods Panel",
+    "subtitle": "Premium External Mod",
+    "loginBtn": "Login",
+    "adminBtn": "Get Key",
+    "errorTitle": "Server Error",
+    "errorSub": "Cannot connect to authentication server.",
+    "enableParticles": true,
+    "particleColor1": "#ff00ea",
+    "particleColor2": "#0000ff",
+    "socials": {
+      "telegram": true,
+      "youtube": true,
+      "instagram": true
+    }
+  },
+  "theme": {
+    "useCustom": true,
+    "background": "#050505",
+    "accent": "#00e5ff",
+    "text": "#ffffff",
+    "subText": "#aaaaaa"
+  },
+  "social_links": {
+    "telegram": "https://t.me/DPMods",
+    "youtube": "https://youtube.com/@DPMods",
+    "instagram": "https://instagram.com/dpmods_official"
+  },
+  "promo": {
+    "enabled": false,
+    "text": "🛒 BUY CHEAP KEYS - 50% OFF",
+    "url": "https://t.me/DP_Seller"
+  },
+  "update": {
+    "available": false,
+    "force": false,
+    "version": "3.0",
+    "url": "https://example.com/update.apk"
+  },
+  "blacklist": [
+    "BANNED_DEVICE_ID_1",
+    "BANNED_DEVICE_ID_2"
+  ],
+  "keys": {
+    "VIP_GOLD": {
+      "type": "lifetime",
+      "interval": "1d",
+      "notify": true,
+      "toast": "💛 Welcome Gold VIP Member!"
+    },
+    "VIP_SILVER": {
+      "type": "lifetime",
+      "interval": "12h",
+      "notify": true,
+      "toast": "🥈 Welcome Silver Member!"
+    },
+    "TRIAL_1HOUR": {
+      "type": "duration",
+      "value": "1h",
+      "interval": "everytime",
+      "notify": true,
+      "toast": "⏳ 1 Hour Trial Started"
+    },
+    "TRIAL_1DAY": {
+      "type": "duration",
+      "value": "1d",
+      "interval": "everytime",
+      "notify": true,
+      "toast": "📅 24 Hour Trial Active"
+    },
+    "YOUTUBER_KEY": {
+      "type": "lifetime",
+      "devices": [
+        "DEVICE_ID_OF_YOUTUBER_1",
+        "DEVICE_ID_OF_YOUTUBER_2"
+      ],
+      "interval": "1w",
+      "notify": false,
+      "toast": "🎥 Welcome Content Creator!"
+    },
+    "RESELLER_PANEL": {
+      "type": "date",
+      "value": "2030-12-31",
+      "interval": "1d",
+      "notify": true,
+      "toast": "🛒 Reseller Access Granted"
+    },
+    "WEEKLY_SUB": {
+      "type": "duration",
+      "value": "7d",
+      "interval": "6h",
+      "notify": true,
+      "toast": "Weekly Subscription Active"
+    },
+    "MONTHLY_SUB": {
+      "type": "duration",
+      "value": "30d",
+      "interval": "1d",
+      "notify": true,
+      "toast": "Monthly Subscription Active"
+    },
+    "BETA_TESTER": {
+      "type": "date",
+      "interval": "everytime",
+      "notify": true,
+      "value": "2047-05-01",
+      "toast": "🧪 Beta Access (Expires May 1st)",
+      "devices": [
+        "TESTER_DEVICE_1",
+        "TESTER_DEVICE_2"
+      ]
+    },
+    "ADMIN_ACCESS": {
+      "type": "lifetime",
+      "devices": [
+        "YOUR_PERSONAL_DEVICE_ID"
+      ],
+      "notify": false,
+      "toast": "👑 Welcome Owner"
+    },
+    "DPMods": {
+      "type": "duration",
+      "interval": "everytime",
+      "notify": true,
+      "value": "1h",
+      "toast": "🛒 Reseller Access Granted"
+    },
+    "atul": {
+      "type": "date",
+      "interval": "everytime",
+      "notify": true,
+      "value": "2025-11-25",
+      "toast": "Today Key"
+    }
+  }
+}
