@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DPMods Admin - Final Fix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=JetBrains+Mono:wght[400]&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* === GLOBAL VARIABLES (Purple Glass Theme) === */
+        :root {
+            --bg-color: #10051a;
+            --glass: rgba(40, 10, 50, 0.7);
+            --glass-border: rgba(187, 102, 255, 0.25);
+            --primary: #bb66ff; 
+            --text: #ffffff;
+            --text-muted: #d1d1d1;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --button-bg: #2d1b36;
+            --dropdown-bg: #1a0823;
+
+            /* Status Colors */
+            --c-expired: #ff4d4d;
+            --c-warning: #ffbb33;
+            --c-valid: #00c851;
+            --c-lifetime: #f5f6fa;
+            --c-duration: #33b5e5;
+
+            --radius: 14px;
+            --font: 'Poppins', sans-serif;
+            --blur: blur(16px);
+            --padding: 18px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 90% 10%, rgba(187, 102, 255, 0.1), transparent 40%),
+                              radial-gradient(circle at 10% 90%, rgba(50, 20, 80, 0.4), transparent 40%);
+            color: var(--text); font-family: var(--font); 
+            margin: 0; padding-bottom: 90px;
+            overflow-x: hidden;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        /* --- LAYOUT --- */
+        .app-main { display: flex; flex-grow: 1; width: 100%; }
+        .tab-wrapper { flex-grow: 1; padding: 0; }
+        .tab-content { display: none; padding: var(--padding); max-width: 900px; margin: 0 auto; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- HEADER --- */
+        header { 
+            position: sticky; top: 0; z-index: 100; 
+            background: rgba(16, 5, 26, 0.9); backdrop-filter: var(--blur); 
+            padding: var(--padding); border-bottom: 1px solid var(--glass-border);
+        }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .brand { font-size: 1.3rem; font-weight: 600; display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px; }
+        .action-btn { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .action-btn:active { transform: scale(0.95); }
+
+        .search-wrap { display: flex; gap: 10px; height: 48px; }
+        .search-box { flex: 1; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; align-items: center; padding: 0 15px; }
+        .search-box input { font-size: 0.95rem; background: none; border: none; color: white; flex: 1; outline: none; font-family: var(--font); margin-left: 10px; }
+        
+        .sort-btn { width: 110px; font-size: 0.85rem; position: relative; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); gap: 6px; }
+        .sort-dropdown { position: absolute; top: 55px; right: 0; width: 160px; background: #150520; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: none; z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .sort-opt { padding: 12px; font-size: 0.85rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .sort-opt:hover, .sort-opt.active { background: var(--primary); color: white; }
+
+        /* --- CARDS --- */
+        .glass-card { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .card-head { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--primary); font-weight: 700; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+
+        /* --- KEY LIST ITEM --- */
+        .key-item { 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid var(--glass-border); 
+            border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            transition: 0.2s; cursor: pointer; position: relative;
+        }
+        .key-item:hover { background: rgba(255, 255, 255, 0.06); transform: translateY(-2px); }
+        
+        .k-info h4 { font-size: 1rem; margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; letter-spacing: -0.5px; }
+        .k-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tag { font-size: 0.7rem; padding: 4px 10px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-muted); }
+        
+        .k-actions { display: flex; gap: 15px; }
+        .k-actions i { font-size: 1.1rem; color: var(--text-muted); transition: 0.2s; }
+        .k-actions i:hover { color: var(--primary); }
+
+        .dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
+        .dot-expired { background: var(--c-expired); box-shadow: 0 0 8px var(--c-expired); }
+        .dot-warning { background: var(--c-warning); box-shadow: 0 0 8px var(--c-warning); animation: pulse 1.5s infinite; }
+        .dot-valid { background: var(--c-valid); box-shadow: 0 0 8px var(--c-valid); }
+        .dot-lifetime { background: var(--c-lifetime); box-shadow: 0 0 8px var(--c-lifetime); }
+        .dot-duration { background: var(--c-duration); box-shadow: 0 0 8px var(--c-duration); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* --- FORMS --- */
+        .input-grp { margin-bottom: 15px; }
+        .input-grp label { display: block; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; }
+        .inp { 
+            width: 100%; padding: 14px; font-size: 0.95rem; border-radius: 12px; 
+            background: var(--input-bg); border: 1px solid var(--glass-border); 
+            color: white; font-family: 'JetBrains Mono', monospace; 
+            box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+        .inp:focus { border-color: var(--primary); background: rgba(255,255,255,0.08); }
+        
+        select.inp { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; }
+        select.inp option { background: var(--dropdown-bg); color: white; padding: 10px; }
+
+        /* --- NAV & FAB --- */
+        .navbar { position: fixed; bottom: 0; width: 100%; height: 70px; background: rgba(10, 5, 26, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; z-index: 900; }
+        .nav-btn { text-align: center; color: var(--text-muted); font-size: 0.65rem; flex: 1; transition: 0.3s; cursor: pointer; }
+        .nav-btn i { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+        .nav-btn.active { color: var(--primary); transform: translateY(-3px); }
+
+        .sidebar { display: none; position: sticky; top: 0; width: 240px; padding: 20px 0; background: rgba(10, 5, 26, 0.8); border-right: 1px solid var(--glass-border); height: 100vh; }
+        .side-btn { display: flex; align-items: center; padding: 16px 25px; color: var(--text-muted); cursor: pointer; transition: 0.2s; font-size: 0.95rem; gap: 15px; }
+        .side-btn:hover, .side-btn.active { background: rgba(187, 102, 255, 0.15); color: var(--primary); border-left: 3px solid var(--primary); }
+
+        @media (min-width: 900px) {
+            body { padding-bottom: 0; }
+            .navbar { display: none; }
+            .sidebar { display: block; }
+            .tab-wrapper { padding: 20px 40px; }
+            .fab-stack { bottom: 30px; right: 30px; }
+        }
+
+        /* --- FAB & MODAL --- */
+        .fab-stack { position: fixed; bottom: 90px; right: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 950; }
+        .fab { width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; color: white; border: none; cursor: pointer; background: var(--primary); box-shadow: 0 8px 20px rgba(0,0,0,0.5); transition: 0.3s; }
+        .fab:active { transform: scale(0.9); }
+        .fab-magic { background: linear-gradient(135deg, #bb66ff, #ff55a3); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10000; }
+        
+        /* Animation for modal visibility */
+        @keyframes modalPop { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .modal-box { 
+            background: #150520; width: 90%; max-width: 420px; padding: 30px; 
+            border-radius: 24px; border: 1px solid var(--glass-border); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        
+        .modal-btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; }
+        .m-btn { padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; border: none; font-size: 0.9rem; }
+        .m-save { background: var(--primary); color: white; }
+        .m-close { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+
+        /* Loader & Toast */
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 11000; display: none; justify-content: center; align-items: center; flex-direction: column; gap: 15px; color: var(--primary); }
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 24px; border-radius: 50px; font-size: 0.9rem; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 11000; opacity: 0; transition: 0.3s; pointer-events: none; white-space: nowrap; }
+    </style>
+</head>
+<body onload="initApp()">
+
+    <div id="toast">Notification</div>
+    <div id="loader"><i class="fas fa-circle-notch fa-spin fa-2x"></i><span>Syncing Data...</span></div>
+
+    <datalist id="time-presets"><option value="1h"><option value="12h"><option value="1d"><option value="3d"><option value="1w"><option value="30d"><option value="lifetime"></datalist>
+
+    <header>
+        <div class="top-row">
+            <div class="brand"><i class="fas fa-shield-halved"></i> DPMods Admin</div>
+            <div class="action-btn" onclick="loadData()"><i class="fas fa-sync-alt"></i></div>
+        </div>
+        <div class="search-wrap">
+            <div class="search-box">
+                <i class="fas fa-search" style="opacity:0.5"></i>
+                <input type="text" id="search" placeholder="Search keys..." oninput="renderKeys()">
+            </div>
+            <div class="sort-btn" onclick="toggleSort()">
+                <i class="fas fa-filter"></i> <span id="sortLbl">Default</span>
+                <div id="sortMenu" class="sort-dropdown">
+                    <div class="sort-opt active" onclick="setSort('default', 'Default (Smart)')">Default (Smart)</div>
+                    <div class="sort-opt" onclick="setSort('exp', 'Expiring Soon')">Expiring Soon</div>
+                    <div class="sort-opt" onclick="setSort('az', 'Name A-Z')">Name A-Z</div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="app-main">
+        <nav class="sidebar">
+            <div class="side-btn active" onclick="nav('keys', this)"><i class="fas fa-key"></i> Keys</div>
+            <div class="side-btn" onclick="nav('config', this)"><i class="fas fa-cogs"></i> Config</div>
+            <div class="side-btn" onclick="nav('security', this)"><i class="fas fa-shield-alt"></i> Security</div>
+            <div class="side-btn" onclick="nav('ui', this)"><i class="fas fa-palette"></i> Appearance</div>
+            <div class="side-btn" onclick="nav('promo', this)"><i class="fas fa-bullhorn"></i> Promo</div>
+        </nav>
+
+        <div class="tab-wrapper">
+            <div id="tab-keys" class="tab-content active">
+                <div id="keysList"></div>
+            </div>
+
+            <div id="tab-config" class="tab-content">
+                <div class="glass-card">
+                    <div class="card-head"><i class="fas fa-globe"></i> System Config</div>
+                    <div style="display:flex; gap:10px;">
+                        <div class="input-grp" style="flex:1"><label>Maintenance</label><select id="c_maint" class="inp select-styled"><option value="true">ON</option><option value="false">OFF</option></select></div>
+                        <div class="input-grp" style="flex:1"><label>Silent Check</label><select id="c_silent" class="inp select-styled"><option value="true">ON</option><option value="false">OFF</option></select></div>
+                    </div>
+                    <div class="input-grp"><label>Admin Contact URL</label><input type="text" id="c_admin" class="inp"></div>
+                    <div class="input-grp"><label>Timezone</label><input type="text" id="c_tz" class="inp"></div>
+                </div>
+                <div class="glass-card">
+                    <div class="card-head"><i class="fab fa-telegram"></i> Telegram Integration</div>
+                    <div class="input-grp"><label>Bot Token</label><input type="text" id="c_bot" class="inp"></div>
+                    <div class="input-grp"><label>Chat ID</label><input type="text" id="c_chat" class="inp"></div>
+                    <div class="input-grp"><label>Broadcast Active</label><select id="c_bc_active" class="inp select-styled"><option value="true">YES</option><option value="false">NO</option></select></div>
+                    <div class="input-grp"><label>Broadcast Msg</label><textarea id="c_bc_msg" class="inp" rows="2"></textarea></div>
+                    <div class="modal-btn-row"><button class="m-btn m-save" onclick="saveAllData()">Save Config</button></div>
+                </div>
+            </div>
+
+            <div id="tab-security" class="tab-content">
+                <div class="glass-card">
+                    <div class="card-head"><i class="fas fa-lock"></i> Security</div>
+                    <div class="input-grp"><label>Package Name</label><input type="text" id="s_pkg" class="inp"></div>
+                    <div class="input-grp"><label>Kill on Mismatch?</label><select id="s_kill" class="inp select-styled"><option value="true">YES</option><option value="false">NO</option></select></div>
+                </div>
+                <div class="glass-card">
+                    <div class="card-head"><i class="fas fa-ban"></i> Device Blacklist</div>
+                    <div class="input-grp"><label>One ID per line</label><textarea id="s_bl" class="inp" rows="6"></textarea></div>
+                    <div class="modal-btn-row"><button class="m-btn m-save" onclick="saveAllData()">Save Security</button></div>
+                </div>
+            </div>
+
+            <div id="tab-ui" class="tab-content">
+                <div class="glass-card">
+                    <div class="card-head"><i class="fas fa-paint-brush"></i> Login UI</div>
+                    <div class="input-grp"><label>Title</label><input type="text" id="u_title" class="inp"></div>
+                    <div class="input-grp"><label>Subtitle</label><input type="text" id="u_sub" class="inp"></div>
+                    <div style="display:flex; gap:10px">
+                        <div class="input-grp" style="flex:1"><label>Login Btn</label><input type="text" id="u_lbtn" class="inp"></div>
+                        <div class="input-grp" style="flex:1"><label>Get Key Btn</label><input type="text" id="u_abtn" class="inp"></div>
+                    </div>
+                    <div class="input-grp"><label>Error Title</label><input type="text" id="ui_errorTitle" class="inp"></div>
+                    <div class="input-grp"><label>Error Subtitle</label><input type="text" id="ui_errorSub" class="inp"></div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-head"><i class="fas fa-palette"></i> Custom Theme</div>
+                    <div class="input-grp"><label>Use Custom Colors?</label>
+                        <select id="theme_useCustom" class="inp select-styled"><option value="true">YES</option><option value="false">NO</option></select>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <div class="input-grp" style="flex:1"><label>Background</label><input type="color" id="theme_background" class="inp" style="height:45px;"></div>
+                        <div class="input-grp" style="flex:1"><label>Accent</label><input type="color" id="theme_accent" class="inp" style="height:45px;"></div>
+                        <div class="input-grp" style="flex:1"><label>Text</label><input type="color" id="theme_text" class="inp" style="height:45px;"></div>
+                        <div class="input-grp" style="flex:1"><label>Sub Text</label><input type="color" id="theme_subText" class="inp" style="height:45px;"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-head"><i class="fas fa-star"></i> Particles & Socials</div>
+                    <div class="input-grp"><label>Enable Particles</label>
+                        <select id="ui_enableParticles" class="inp select-styled"><option value="true">YES</option><option value="false">NO</option></select>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <div class="input-group" style="flex:1"><label>Particle 1</label><input type="color" id="ui_particleColor1" class="inp" style="height:45px;"></div>
+                        <div class="input-group" style="flex:1"><label>Particle 2</label><input type="color" id="ui_particleColor2" class="inp" style="height:45px;"></div>
+                    </div>
+
+                    <hr style="border-color:var(--glass-border); margin: 20px 0;">
+                    
+                    <div style="display:flex; gap:10px;">
+                        <div class="input-group" style="flex:1"><label>Show TG</label><select id="soc_telegram" class="inp select-styled"><option value="true">YES</option><option value="false">NO</option></select></div>
+                        <div class="input-group" style="flex:1"><label>Show YT</label><select id="soc_youtube" class="inp select-styled"><option value="true">YES</option><option value="false">NO</option></select></div>
+                        <div class="input-group" style="flex:1"><label>Show IG</label><select id="soc_insta        global.channels = parseM3U(playlist);
+        res.writeHead(302, { Location: '/' });
+        res.end();
+        return;
+      }
+      
+      // Play stream
+      if (params.get('play_stream')) {
+        const url = params.get('stream_url');
+        const name = params.get('stream_name');
+        global.currentUrl = '/proxy?url=' + encodeURIComponent(url);
+        global.currentName = name;
+        global.isLive = true;
+        res.writeHead(302, { Location: '/' });
+        res.end();
+        return;
+      }
+      
+      // Stop stream
+      if (params.get('stop')) {
+        global.isLive = false;
+        global.currentUrl = '';
+        res.writeHead(302, { Location: '/' });
+        res.end();
+        return;
+      }
+    });
+    return;
+  }
+  
+  // Handle proxy for streams
+  if (req.url.startsWith('/proxy')) {
+    const url = new URL(req.url, 'http://localhost');
+    const streamUrl = url.searchParams.get('url');
+    if (!streamUrl) {
+      res.statusCode = 400;
+      res.end('No URL');
+      return;
+    }
+    
+    fetch(streamUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    })
+    .then(response => response.arrayBuffer())
+    .then(data => {
+      res.setHeader('Content-Type', 'video/mp4');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.end(Buffer.from(data));
+    })
+    .catch(() => {
+      res.statusCode = 500;
+      res.end('Proxy error');
+    });
+    return;
+  }
+  
+  // Parse M3U function
+  function parseM3U(content) {
+    const channels = [];
+    const lines = content.split('\n');
+    let currentName = '';
+    
+    for (let line of lines) {
+      line = line.trim();
+      
+      if (line.startsWith('#EXTINF:')) {
+        const match = line.match(/#EXTINF:[^,]*,?(.*)/);
+        currentName = (match ? match[1] : 'Unknown').replace(/[^\w\s\.\-\(\)]/g, '');
+      } else if (currentName && (line.startsWith('http://') || line.startsWith('https://'))) {
+        channels.push({ name: currentName, url: line });
+        currentName = '';
+      }
+    }
+    return channels;
+  }
+  
+  // Get current data
+  const channels = global.channels || [];
+  const currentName = global.currentName || 'No channel';
+  const isLive = global.isLive || false;
+  const currentUrl = global.currentUrl || '';
+  
+  // Render HTML
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA Live Stream - IPTV Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:linear-gradient(135deg,#0a0a2a,#1a1a3e);color:#fff;font-family:'Segoe UI',Arial,sans-serif}
+        .navbar{background:#000;padding:1rem 2rem;border-bottom:3px solid #f39c12;display:flex;justify-content:space-between}
+        .logo{font-size:1.5rem;font-weight:bold;color:#f39c12}
+        .live-badge{background:#ff0000;color:#fff;padding:5px 12px;border-radius:20px;animation:pulse 1s infinite}
+        @keyframes pulse{0%{opacity:1}50%{opacity:0.5}100%{opacity:1}}
+        .container{max-width:1400px;margin:0 auto;padding:20px}
+        .video-container{background:#000;border-radius:15px;overflow:hidden;margin-bottom:20px;min-height:400px}
+        video{width:100%;background:#000;max-height:70vh}
+        .offline{background:linear-gradient(135deg,#1e3c72,#2a5298);padding:60px;text-align:center;border-radius:15px}
+        .now-playing{background:#111;padding:12px;border-radius:10px;margin-bottom:15px;text-align:center}
+        .channel-list{background:rgba(0,0,0,0.7);border-radius:15px;padding:20px;margin-top:20px;max-height:400px;overflow-y:auto}
+        .channel-item{background:#222;margin:8px 0;padding:12px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}
+        .channel-item:hover{background:#333}
+        .play-btn{background:#f39c12;color:#000;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-weight:bold}
+        .play-btn:hover{background:#ffed4a}
+        .admin-panel{background:rgba(0,0,0,0.8);border-radius:15px;padding:20px;margin-top:20px;border:1px solid #f39c12}
+        textarea{width:100%;background:#222;border:1px solid #f39c12;color:#fff;padding:12px;border-radius:8px;font-family:monospace;font-size:12px}
+        input{width:100%;background:#222;border:1px solid #f39c12;color:#fff;padding:12px;border-radius:8px;margin-top:10px}
+        button{background:#f39c12;color:#000;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold;margin-top:10px}
+        .stop-btn{background:#e74c3c;color:#fff}
+        hr{border-color:#333;margin:20px 0}
+        .channel-count{color:#f39c12;margin-left:10px}
+        @media(max-width:768px){.logo{font-size:18px}}
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">🏀 NBA LIVE - IPTV PLAYER</div>
+    <div>
+        ${isLive ? '<span class="live-badge">LIVE</span>' : ''}
+        ${!isAdmin ? '<button onclick="showLogin()" style="background:#f39c12;padding:5px 15px;border:none;border-radius:5px;margin-left:10px">Admin</button>' : 
+          '<form method="POST" style="display:inline"><button type="submit" name="logout" style="background:#e74c3c;padding:5px 15px;border:none;border-radius:5px;color:#fff;margin-left:10px">Logout</button></form>'}
+    </div>
+</div>
+
+<div class="container">
+    <!-- Video Player -->
+    <div class="video-container">
+        ${isLive && currentUrl ? 
+            '<video id="videoPlayer" controls autoplay playsinline></video>' : 
+            '<div class="offline"><h3>📺 No Stream Playing</h3><p>Load M3U playlist or paste direct stream URL below</p></div>'}
+    </div>
+
+    <div class="now-playing">
+        📍 NOW PLAYING: <strong>${currentName}</strong>
+    </div>
+
+    <!-- Channel List -->
+    ${channels.length > 0 ? `
+    <div class="channel-list">
+        <h3>📡 Channels <span class="channel-count">(${channels.length})</span></h3>
+        ${channels.map(ch => `
+        <div class="channel-item">
+            <span>${escapeHtml(ch.name)}</span>
+            ${isAdmin ? 
+                `<form method="POST" style="margin:0">
+                    <input type="hidden" name="stream_url" value="${escapeAttr(ch.url)}">
+                    <input type="hidden" name="stream_name" value="${escapeAttr(ch.name)}">
+                    <button type="submit" name="play_stream" class="play-btn">▶ PLAY</button>
+                </form>` : 
+                '<span class="play-btn" style="background:#555;cursor:not-allowed">Login to Play</span>'}
+        </div>
+        `).join('')}
+    </div>
+    ` : ''}
+
+    <!-- Admin Panel -->
+    ${isAdmin ? `
+    <div class="admin-panel">
+        <h3>🔧 ADMIN PANEL</h3>
+        
+        <form method="POST">
+            <h4>Option 1: Paste M3U Playlist</h4>
+            <textarea name="playlist" rows="8" placeholder="#EXTM3U&#10;#EXTINF:-1,NBA LIVE&#10;http://206.212.244.183:25461/live/4abYcSzugD/7732488130/23211.m3u8?token=..."></textarea>
+            <button type="submit" name="save_playlist">💾 Save Playlist</button>
+        </form>
+        
+        <hr>
+        
+        <form method="POST">
+            <h4>Option 2: Direct Stream URL (with token)</h4>
+            <input type="text" name="stream_url" placeholder="http://... .m3u8 or .mpd" required>
+            <input type="text" name="stream_name" placeholder="Channel name (optional)">
+            <button type="submit" name="play_stream">🎬 Play Stream</button>
+        </form>
+        
+        ${isLive ? `
+        <form method="POST">
+            <button type="submit" name="stop" class="stop-btn">⏹ Stop Stream</button>
+        </form>
+        ` : ''}
+        
+        <div style="margin-top:20px;padding:15px;background:#222;border-radius:10px">
+            <strong>📖 Instructions:</strong>
+            <ol style="margin-left:20px;margin-top:10px">
+                <li>Paste your M3U playlist content (like the one with NBA LIVE)</li>
+                <li>Click Save Playlist - channels will appear above</li>
+                <li>Click PLAY on any channel</li>
+                <li>Supports .m3u8 (HLS) and .mpd (DASH)</li>
+            </ol>
+        </div>
+    </div>
+    ` : ''}
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000">
+    <div style="background:#222;margin:20% auto;width:350px;padding:25px;border-radius:15px;border:1px solid #f39c12">
+        <h3 style="color:#f39c12">Admin Login</h3>
+        <form method="POST">
+            <input type="password" name="pass" placeholder="Password" style="width:100%;padding:12px;margin:15px 0;background:#333;border:1px solid #f39c12;color:#fff;border-radius:8px" required>
+            <button type="submit" name="login" style="width:100%;padding:12px">Login</button>
+            <button type="button" onclick="closeLogin()" style="width:100%;margin-top:10px;background:#555">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+let video = document.getElementById('videoPlayer');
+let hls = null;
+
+function initPlayer(url) {
+    if (hls) { hls.destroy(); hls = null; }
+    if (!video) return;
+    
+    video.removeAttribute('src');
+    video.load();
+    
+    if (url.includes('.m3u8')) {
+        if (Hls.isSupported()) {
+            hls = new Hls({ debug: false });
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            hls.on(Hls.Events.ERROR, (e, d) => console.error('HLS Error:', d));
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url;
+            video.play();
+        }
+    } else {
+        video.src = url;
+        video.play();
+    }
+}
+
+${isLive && currentUrl ? `initPlayer('${currentUrl}');` : ''}
+
+function showLogin() {
+    document.getElementById('loginModal').style.display = 'block';
+}
+function closeLogin() {
+    document.getElementById('loginModal').style.display = 'none';
+}
+
+function escapeHtml(text) {
+    return text.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+</script>
+</body>
+</html>`);
+  
+  function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
+  function escapeAttr(text) {
+    if (!text) return '';
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+};
