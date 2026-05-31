@@ -1,0 +1,6 @@
+#KODIPROP:inputstreamaddon=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=dash
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=045d103180f64562b1db7c932741c3ba:c3380548b9075c767a6ae2006ef4bff8
+#EXTINF:-1 tvg-id="Kapatid Channel" tvg-logo="ch_kapatid_channel" group-title="Entertainment", Kapatid Channel
+https://ucdn.mediaquest.com.ph/bpk-tv/kapatid_hd/default/index.mpd
